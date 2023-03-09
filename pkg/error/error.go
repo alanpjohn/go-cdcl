@@ -9,7 +9,6 @@ func (S SolverError) Error() string {
 	return S.Message
 }
 
-func ThrowSolverError(msg string, err error) SolverError {
+func Throw(msg string, err error) SolverError {
 	return SolverError{Message: msg, Err: err}
 }
-

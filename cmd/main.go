@@ -6,8 +6,12 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	dbg "github.com/alanpjohn/go-cdcl/pkg/debug"
+	handler "github.com/alanpjohn/go-cdcl/pkg/error"
+	reader "github.com/alanpjohn/go-cdcl/pkg/io"
+	logger "github.com/alanpjohn/go-cdcl/pkg/logger"
 )
+
+var version string
 
 func isInputFromPipe() bool {
 	fileInfo, _ := os.Stdin.Stat()
@@ -15,16 +19,29 @@ func isInputFromPipe() bool {
 }
 
 func solve(cCtx *cli.Context) error {
-	if cCtx.Bool("verbose") {
-		dbg.Info("Verbose flag detected")
+	logger.Verbosity = cCtx.Bool("verbose")
+
+	filename := cCtx.String("file")
+
+	if filename == "" && !isInputFromPipe() {
+		return handler.Throw("No input was provided", nil)
 	}
+
 	if isInputFromPipe() {
-		dbg.Info("Input from Standard Pipe")
+		logger.Info("Recieved Input for stdin pipe")
+		if _, err := reader.Process(os.Stdin); err != nil {
+			return err
+		}
 	}
-	if cCtx.String("file") != "" {
-		dbg.Info("Input from flag")
+
+	if filename != "" {
+		logger.Info("Input from flag")
+		if _, err := reader.ReadFile(filename); err != nil {
+			return err
+		}
 	}
-	return dbg.ThrowSolverError("No input provided", nil)
+
+	return nil
 }
 
 // Run CLI application which reads SAT file from standard input pipe and returns solution
@@ -52,6 +69,6 @@ func main() {
 	})
 
 	if err := app.Run(os.Args); err != nil {
-		dbg.Error(err)
+		logger.Error(err)
 	}
 }

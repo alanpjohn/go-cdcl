@@ -2,12 +2,11 @@
 package main
 
 import (
-	"log"
 	"os"
 
 	"github.com/urfave/cli/v2"
 
-	err "github.com/alanpjohn/go-cdcl/pkg/error"
+	dbg "github.com/alanpjohn/go-cdcl/pkg/debug"
 )
 
 func isInputFromPipe() bool {
@@ -17,15 +16,15 @@ func isInputFromPipe() bool {
 
 func solve(cCtx *cli.Context) error {
 	if cCtx.Bool("verbose") {
-		log.Println("Verbose flag detected")
+		dbg.Info("Verbose flag detected")
 	}
 	if isInputFromPipe() {
-		log.Println("Input from Standard Pipe")
+		dbg.Info("Input from Standard Pipe")
 	}
 	if cCtx.String("file") != "" {
-		log.Print("Input from flag", cCtx.String("file"))
+		dbg.Info("Input from flag")
 	}
-	return err.SolverError{Message: "No input provided"}
+	return dbg.ThrowSolverError("No input provided", nil)
 }
 
 // Run CLI application which reads SAT file from standard input pipe and returns solution
@@ -53,6 +52,6 @@ func main() {
 	})
 
 	if err := app.Run(os.Args); err != nil {
-		log.Fatal(err)
+		dbg.Error(err)
 	}
 }

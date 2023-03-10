@@ -8,12 +8,22 @@ import (
 	"strconv"
 	"strings"
 
-	base "github.com/alanpjohn/go-cdcl/pkg/base"
 	handler "github.com/alanpjohn/go-cdcl/pkg/error"
 	logger "github.com/alanpjohn/go-cdcl/pkg/logger"
+	types "github.com/alanpjohn/go-cdcl/pkg/types"
 )
 
-func Process(f *os.File) (sat base.SATFile, err error) {
+func fileExists(filename string) (bool, error) {
+	if _, err := os.Stat(filename); err == nil {
+		return true, nil
+	} else if errors.Is(err, os.ErrNotExist) {
+		return false, nil
+	} else {
+		return false, err
+	}
+}
+
+func Process(f *os.File) (sat types.SATFile, err error) {
 
 	fileScanner := bufio.NewScanner(f)
 
@@ -21,7 +31,7 @@ func Process(f *os.File) (sat base.SATFile, err error) {
 
 	var atomCount int
 	var clauseCount int
-	var clauses []base.Disjunction
+	var clauses []types.Disjunction
 
 	for fileScanner.Scan() {
 		line := fileScanner.Text()
@@ -42,7 +52,7 @@ func Process(f *os.File) (sat base.SATFile, err error) {
 			}
 		} else {
 			var val int
-			var cl base.Disjunction
+			var cl types.Disjunction
 			for i := 0; i < len(items); i++ {
 				if val, err = strconv.Atoi(items[i]); err != nil {
 					return
@@ -53,7 +63,7 @@ func Process(f *os.File) (sat base.SATFile, err error) {
 				if val == 0 {
 					break
 				}
-				cl = append(cl, base.Literal(val))
+				cl = append(cl, types.Literal(val))
 			}
 			logger.Info(fmt.Sprintf("%v", cl))
 			clauses = append(clauses, cl)
@@ -67,30 +77,20 @@ func Process(f *os.File) (sat base.SATFile, err error) {
 
 	defer f.Close()
 
-	return base.SATFile{}, err
+	return sat, err
 }
 
-func ReadFile(filename string) (out base.SATFile, err error) {
+func ReadFile(filename string) (out types.SATFile, err error) {
 	if filename == "" {
-		return base.SATFile{}, handler.Throw("Please input a file", nil)
+		return types.SATFile{}, handler.Throw("Please input a file", nil)
 	}
 	exists, e := fileExists(filename)
 	if !exists {
-		return base.SATFile{}, handler.Throw("The file provided does not exist", e)
+		return types.SATFile{}, handler.Throw("The file provided does not exist", e)
 	}
 	file, e := os.Open(filename)
 	if e != nil {
-		return base.SATFile{}, handler.Throw("File could not be read", err)
+		return types.SATFile{}, handler.Throw("File could not be read", err)
 	}
 	return Process(file)
-}
-
-func fileExists(filename string) (bool, error) {
-	if _, err := os.Stat(filename); err == nil {
-		return true, nil
-	} else if errors.Is(err, os.ErrNotExist) {
-		return false, nil
-	} else {
-		return false, err
-	}
 }

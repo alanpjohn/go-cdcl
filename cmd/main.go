@@ -2,6 +2,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/urfave/cli/v2"
@@ -9,6 +10,8 @@ import (
 	handler "github.com/alanpjohn/go-cdcl/pkg/error"
 	reader "github.com/alanpjohn/go-cdcl/pkg/io"
 	logger "github.com/alanpjohn/go-cdcl/pkg/logger"
+	solver "github.com/alanpjohn/go-cdcl/pkg/solver"
+	types "github.com/alanpjohn/go-cdcl/pkg/types"
 )
 
 var version string
@@ -27,21 +30,34 @@ func solve(cCtx *cli.Context) error {
 		return handler.Throw("No input was provided", nil)
 	}
 
+	var (
+		sol      types.Solver
+		sat      types.SATFile
+		err      error
+		solution types.Solution
+	)
+
 	if isInputFromPipe() {
 		logger.Info("Recieved Input for stdin pipe")
-		if _, err := reader.Process(os.Stdin); err != nil {
+		if sat, err = reader.Process(os.Stdin); err != nil {
 			return err
 		}
 	}
 
 	if filename != "" {
 		logger.Info("Input from flag")
-		if _, err := reader.ReadFile(filename); err != nil {
+		if sat, err = reader.ReadFile(filename); err != nil {
 			return err
 		}
 	}
 
-	return nil
+	if sol, err = solver.InitializeBaseSolver(sat); err != nil {
+		return err
+	}
+	logger.Info("Solver initialized")
+	solution, err = sol.Solve()
+	fmt.Print(solution.String())
+	return err
 }
 
 // Run CLI application which reads SAT file from standard input pipe and returns solution

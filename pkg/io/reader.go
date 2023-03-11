@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -52,7 +53,7 @@ func Process(f *os.File) (sat types.SATFile, err error) {
 			}
 		} else {
 			var val int
-			var cl types.Disjunction
+			var arr []int
 			for i := 0; i < len(items); i++ {
 				if val, err = strconv.Atoi(items[i]); err != nil {
 					return
@@ -63,10 +64,15 @@ func Process(f *os.File) (sat types.SATFile, err error) {
 				if val == 0 {
 					break
 				}
-				cl = append(cl, types.Literal(val))
+				arr = append(arr, val)
 			}
-			logger.Info(fmt.Sprintf("%v", cl))
-			clauses = append(clauses, cl)
+			var d types.Disjunction
+			sort.Ints(arr)
+			for _, v := range arr {
+				d = append(d, types.Literal(v))
+			}
+			logger.Info(fmt.Sprintf("%v", d))
+			clauses = append(clauses, d)
 		}
 
 	}

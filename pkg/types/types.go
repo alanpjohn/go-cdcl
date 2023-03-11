@@ -41,9 +41,12 @@ const (
 
 type Clause interface {
 	Type() ClauseType
-	Apply(l Literal)
-	Undo(l Literal)
+	Apply(l Literal) Clause
+	Undo(l Literal) Clause
+	Reset() Clause
 	Contains(l Literal) bool
+	IsSolved() bool
+	IsLearnt() bool
 	Disjunction() Disjunction
 	Original() Disjunction
 }
@@ -53,7 +56,10 @@ Formula represents the formula of clauses to be solved by the solver.
 */
 type Formula interface {
 	NextClause() Clause
-	Apply(l Literal) Formula
+	Assign(l Literal) Formula
+	Unassign(l Literal) Formula
+	Learn(c Clause) Formula
+	Restart() Formula
 }
 
 // Solver interface solves a given Formula
@@ -71,6 +77,7 @@ type Solution uint
 const (
 	SATISFIABLE   Solution = iota // A model exists that satifies the formula
 	UNSATISFIABLE                 // No model exists that can satisfy the formula
+	PROGRESS                      // The Solver is currently working on the solution
 	UNKNOWN                       // Solver could not find a model that satifies the formula and could not estabilish unsatisfiability due to some error
 )
 

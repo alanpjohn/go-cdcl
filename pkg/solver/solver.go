@@ -159,6 +159,7 @@ func (solver *BaseCDCLSolver) ResolveConflict(clause types.Clause) (err error) {
 		modelElem := &ModelElement{
 			Literal:  lastLit,
 			Decision: false,
+			Reason:   resolved,
 		}
 
 		logger.Info(fmt.Sprintf("Appending after conflict resolve %v", lastLit))
@@ -179,6 +180,9 @@ func (solver *BaseCDCLSolver) AnalyseConflict(clause types.Clause) (types.Clause
 
 		for !solver.UIP(lit, clause) {
 			reason := modelElement.Reason
+			if reason == nil {
+				return clause, handler.Throw("null", nil)
+			}
 			logger.Info(fmt.Sprintf("Resolving with %v", reason.Original()))
 			clause = ResolveBaseClause(reason.Original(), clause.Original(), lit, solver.AtomCount)
 			logger.Info(fmt.Sprintf("Resolved %v", clause.Disjunction()))

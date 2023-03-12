@@ -23,12 +23,11 @@ gocdcl
 go.work
 
 # COMP60332 SAT eval files
+test.sat
 dpll_tests.tar.gz
 dpll_tests/**/*
 gorrila_v0.3/**/*
 g-test
 gorrila
 sat-eval-description.txt
-simple/**/*
-medium/**/*
-hard/**/*
+output/**/*

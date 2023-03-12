@@ -3,7 +3,6 @@ package solver
 import (
 	"fmt"
 
-	logger "github.com/alanpjohn/go-cdcl/pkg/logger"
 	types "github.com/alanpjohn/go-cdcl/pkg/types"
 )
 
@@ -140,9 +139,9 @@ func (f BaseFormula) NextClause() types.Clause {
 func (f BaseFormula) Assign(l types.Literal) types.Formula {
 	for i, c := range f.Clauses {
 		f.Clauses[i] = c.Apply(l)
-		if !f.Clauses[i].IsSolved() {
-			logger.Info(fmt.Sprintf("Updated %v to %v", c.Disjunction(), f.Clauses[i].Disjunction()))
-		}
+		// if !f.Clauses[i].IsSolved() {
+		// 	logger.Info(fmt.Sprintf("Updated %v to %v", c.Disjunction(), f.Clauses[i].Disjunction()))
+		// }
 	}
 	return f
 }

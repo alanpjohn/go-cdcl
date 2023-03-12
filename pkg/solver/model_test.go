@@ -61,7 +61,7 @@ func TestPop(t *testing.T) {
 		})
 	}
 
-	backJump := modelList.PopTillLevel(2)
+	backJump := modelList.PopTillLevel
 
 	var (
 		m   solver.ModelElement
@@ -69,13 +69,13 @@ func TestPop(t *testing.T) {
 	)
 
 	lit := types.Literal(19)
-	for m, err = backJump(); err == nil; {
+	for m, err = backJump(2); err == nil; {
 		t.Logf("Popped literal %v at Decision Level %v\n", m.Literal, m.DecisionLevel)
 		if lit != m.Literal {
 			t.Errorf("Incorrect Item Popped %v with decision level %v\n", m.Literal, m.DecisionLevel)
 		}
 		lit -= 1
-		m, err = backJump()
+		m, err = backJump(2)
 	}
 
 	if lit != types.Literal(12) || modelList.Tail.Literal != types.Literal(12) {

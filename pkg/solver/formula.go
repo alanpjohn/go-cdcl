@@ -3,22 +3,23 @@ package solver
 import (
 	"fmt"
 
+	logger "github.com/alanpjohn/go-cdcl/pkg/logger"
 	types "github.com/alanpjohn/go-cdcl/pkg/types"
 )
 
 type BaseClause struct {
 	original types.Disjunction
 	updated  types.Disjunction
-	solved   bool
+	solved   uint
 	learnt   bool
 }
 
 func ConstructBaseClause(d types.Disjunction, learnt bool) BaseClause {
-	return BaseClause{d, d, false, learnt}
+	return BaseClause{d, d, 0, learnt}
 }
 
 func (c BaseClause) Type() types.ClauseType {
-	if c.solved {
+	if c.solved > 0 {
 		return types.SOLVED_CLAUSE
 	} else if len(c.updated) == 0 {
 		return types.EMPTY_CLAUSE
@@ -32,7 +33,7 @@ func (c BaseClause) Type() types.ClauseType {
 func (c BaseClause) Apply(l types.Literal) types.Clause {
 	for _, cl := range c.updated {
 		if cl == l {
-			c.solved = true
+			c.solved++
 			return c
 		}
 	}
@@ -48,7 +49,17 @@ func (c BaseClause) Apply(l types.Literal) types.Clause {
 }
 
 func (c BaseClause) Undo(l types.Literal) types.Clause {
-	// undo to be implemented
+	for _, cl := range c.original {
+		if cl == l {
+			c.solved--
+			return c
+		}
+	}
+	for _, cl := range c.original {
+		if cl == -l {
+			c.updated = append(c.updated, cl)
+		}
+	}
 	return c
 }
 
@@ -68,7 +79,7 @@ func (c BaseClause) IsLearnt() bool {
 	return c.learnt
 }
 func (c BaseClause) IsSolved() bool {
-	return c.solved
+	return c.solved > 0
 }
 
 func (c BaseClause) Contains(l types.Literal) bool {
@@ -130,7 +141,7 @@ func (f BaseFormula) Assign(l types.Literal) types.Formula {
 	for i, c := range f.Clauses {
 		f.Clauses[i] = c.Apply(l)
 		if !f.Clauses[i].IsSolved() {
-			fmt.Printf("\t%v\n", f.Clauses[i].Disjunction())
+			logger.Info(fmt.Sprintf("Updated %v to %v", c.Disjunction(), f.Clauses[i].Disjunction()))
 		}
 	}
 	return f
@@ -154,4 +165,9 @@ func (f BaseFormula) Restart() types.Formula {
 	}
 
 	return f
+}
+
+func (f BaseFormula) Print() string {
+	return fmt.Sprintf("%v", f.Clauses)
+
 }

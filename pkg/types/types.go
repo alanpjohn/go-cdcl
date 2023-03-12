@@ -60,6 +60,7 @@ type Formula interface {
 	Unassign(l Literal) Formula
 	Learn(c Clause) Formula
 	Restart() Formula
+	Print() string // Debug
 }
 
 // Solver interface solves a given Formula

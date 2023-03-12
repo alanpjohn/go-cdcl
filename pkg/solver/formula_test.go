@@ -8,7 +8,7 @@ import (
 	types "github.com/alanpjohn/go-cdcl/pkg/types"
 )
 
-func TestResolve(t *testing.T) {
+func TestBaseResolve(t *testing.T) {
 	d1 := types.Disjunction{-2, -4, -5}
 	d2 := types.Disjunction{-1, -3, 5}
 	resolved := solver.ResolveBaseClause(d1, d2, -5, 5)
@@ -29,7 +29,5 @@ func TestResolve(t *testing.T) {
 	if resolved.Contains(-5) || resolved.Contains(5) {
 		t.Errorf("Should not contain 5 or -5")
 	}
-
-	
 
 }

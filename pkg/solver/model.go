@@ -25,7 +25,7 @@ func (modelList *ModelList) Pushback(m *ModelElement) {
 	if m.Decision {
 		modelList.DecisionLevel += 1
 	}
-
+	m.DecisionLevel = modelList.DecisionLevel
 	if modelList.Head == nil {
 		modelList.Head = m
 		modelList.Tail = m
@@ -33,7 +33,6 @@ func (modelList *ModelList) Pushback(m *ModelElement) {
 		modelList.Tail.Next = m
 		m.Prev = modelList.Tail
 		modelList.Tail = m
-		m.DecisionLevel = modelList.DecisionLevel
 	}
 	modelList.Size += 1
 
@@ -50,22 +49,34 @@ func (modelList *ModelList) SearchLastLiteral(clause types.Clause) (ModelElement
 	return ModelElement{}, handler.Throw("Literal Not Found", nil)
 }
 
-func (modelList *ModelList) PopTillLevel(level uint) func() (ModelElement, error) {
+func (modelList *ModelList) PopBack() (ModelElement, error) {
+	if modelList.Head == nil {
+		return ModelElement{}, handler.Throw("Empty List", nil)
+	}
 	temp := modelList.Tail
+	prev := temp.Prev
+	modelList.Tail = prev
+	if temp.Decision {
+		modelList.DecisionLevel -= 1
+	}
+	modelList.Size -= 1
+	if prev != nil {
+		prev.Next = nil
+		temp.Prev = nil
+	} else {
+		modelList.Head = nil
+		modelList.Tail = nil
+	}
 
-	return func() (ModelElement, error) {
-		for temp != nil {
-			curr := temp
-			temp = temp.Prev
-			if curr.DecisionLevel > level {
-				modelList.Tail = temp
-				temp.Next = nil
-				curr.Prev = nil
-				modelList.Size -= 1
-				return *curr, nil
-			}
-		}
+	return *temp, nil
+}
 
-		return ModelElement{}, handler.Throw("No more elements", nil)
+func (modelList *ModelList) PopTillLevel(level uint) (ModelElement, error) {
+
+	temp := modelList.Tail
+	if temp == nil || temp.DecisionLevel > level {
+		return modelList.PopBack()
+	} else {
+		return ModelElement{}, handler.Throw("No more literals with a higher decision level", nil)
 	}
 }

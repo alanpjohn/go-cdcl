@@ -9,7 +9,6 @@ import (
 )
 
 type BaseCDCLSolver struct {
-	Seek          types.Literal
 	Model         ModelList
 	Check         []*ModelElement
 	AtomCount     uint
@@ -28,7 +27,6 @@ func InitializeBaseSolver(satfile types.SATFile) (solver BaseCDCLSolver, err err
 	solver.DecisionCount = 0
 	solver.AtomCount = satfile.AtomCount
 	solver.Check = make([]*ModelElement, satfile.AtomCount+1)
-	solver.Seek = 0
 
 	return solver, nil
 }
@@ -140,9 +138,8 @@ func (solver *BaseCDCLSolver) ResolveConflict(clause types.Clause) (err error) {
 				}
 			}
 		}
-		backJumpedLiterals := solver.Model.PopTillLevel(backJumpLevel)
 
-		for m, er := backJumpedLiterals(); er == nil; {
+		for m, er := solver.Model.PopTillLevel(backJumpLevel); er == nil; {
 
 			bLit := m.Literal
 			logger.Info(fmt.Sprintf("Popping %v", bLit))
@@ -154,8 +151,10 @@ func (solver *BaseCDCLSolver) ResolveConflict(clause types.Clause) (err error) {
 			solver.Check[bLit.Atom()] = nil
 			solver.F = solver.F.Unassign(bLit)
 
-			m, er = backJumpedLiterals()
+			m, er = solver.Model.PopTillLevel(backJumpLevel)
 		}
+
+		lastLit = lastLit.Negate()
 
 		modelElem := &ModelElement{
 			Literal:  lastLit,
@@ -178,7 +177,7 @@ func (solver *BaseCDCLSolver) AnalyseConflict(clause types.Clause) (types.Clause
 	} else {
 		lit := modelElement.Literal
 
-		for !solver.UIP(lit.Negate(), clause) {
+		for !solver.UIP(lit, clause) {
 			reason := modelElement.Reason
 			logger.Info(fmt.Sprintf("Resolving with %v", reason.Original()))
 			clause = ResolveBaseClause(reason.Original(), clause.Original(), lit, solver.AtomCount)
@@ -195,7 +194,8 @@ func (solver *BaseCDCLSolver) AnalyseConflict(clause types.Clause) (types.Clause
 }
 
 func (solver *BaseCDCLSolver) UIP(lit types.Literal, clause types.Clause) bool {
-	for _, l2 := range clause.Disjunction() {
+	for _, l2 := range clause.Original() {
+		l2 = l2.Negate()
 		litDL := solver.Check[lit.Atom()].DecisionLevel
 		l2DL := solver.Check[l2.Atom()].DecisionLevel
 		if lit != l2 && l2DL == litDL {

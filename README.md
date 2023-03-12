@@ -7,7 +7,7 @@ CDCL SAT solver made in Go designed for [DIMCAS](http://logic.pdmi.ras.ru/~basol
 ## Get Started
 
 
-### Requirements**
+### Requirements
 
 - Built for Ubuntu/Debian based Linux, might work in other linux distributions but might be unstable
 

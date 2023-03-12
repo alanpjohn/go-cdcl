@@ -3,6 +3,7 @@
 # https://github.com/github/gitignore/blob/main/community/Golang/Go.AllowList.gitignore
 #
 # Binaries for programs and plugins
+gocdcl
 *.exe
 *.exe~
 *.dll
@@ -20,3 +21,13 @@
 
 # Go workspace file
 go.work
+
+# COMP60332 SAT eval files
+test.sat
+dpll_tests.tar.gz
+dpll_tests/**/*
+gorrila_v0.3/**/*
+g-test
+gorrila
+sat-eval-description.txt
+output/**/*

@@ -21,3 +21,14 @@ gocdcl
 
 # Go workspace file
 go.work
+
+# COMP60332 SAT eval files
+dpll_tests.tar.gz
+dpll_tests/**/*
+gorrila_v0.3/**/*
+g-test
+gorrila
+sat-eval-description.txt
+simple/**/*
+medium/**/*
+hard/**/*

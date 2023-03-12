@@ -1,5 +1,10 @@
 package solver
 
+/*
+The experimental file contains alternate implementations of the Clause interface and Formula interface
+To experiment with new ideas
+*/
+
 import (
 	"container/heap"
 	"fmt"

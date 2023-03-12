@@ -6,6 +6,7 @@ import (
 	types "github.com/alanpjohn/go-cdcl/pkg/types"
 )
 
+// Implements the Clause interface defined in `pkg/types/types.go`
 type BaseClause struct {
 	original types.Disjunction
 	updated  types.Disjunction
@@ -13,6 +14,7 @@ type BaseClause struct {
 	learnt   bool
 }
 
+// Constructs an instance of BaseClause from a Disjunction
 func ConstructBaseClause(d types.Disjunction, learnt bool) types.Clause {
 	return BaseClause{d, d, 0, learnt}
 }

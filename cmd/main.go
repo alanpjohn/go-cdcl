@@ -51,7 +51,7 @@ func solve(cCtx *cli.Context) error {
 		}
 	}
 
-	if sol, err = solver.InitializeBaseSolver(sat); err != nil {
+	if sol, err = solver.InitializeBaseSolver(sat, cCtx.Bool("experimental")); err != nil {
 		return err
 	}
 	logger.Info("Solver initialized")
@@ -77,7 +77,14 @@ func main() {
 				Name:     "verbose",
 				Aliases:  []string{"v"},
 				Value:    false,
-				Usage:    "language for the greeting",
+				Usage:    "Switches on detailed logging for cdcl solver",
+				Required: false,
+			},
+			&cli.BoolFlag{
+				Name:     "experimental",
+				Aliases:  []string{"e"},
+				Value:    false,
+				Usage:    "use experimental features",
 				Required: false,
 			},
 		},

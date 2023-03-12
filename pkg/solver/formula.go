@@ -13,7 +13,7 @@ type BaseClause struct {
 	learnt   bool
 }
 
-func ConstructBaseClause(d types.Disjunction, learnt bool) BaseClause {
+func ConstructBaseClause(d types.Disjunction, learnt bool) types.Clause {
 	return BaseClause{d, d, 0, learnt}
 }
 
@@ -90,7 +90,7 @@ func (c BaseClause) Contains(l types.Literal) bool {
 	return false
 }
 
-func ResolveBaseClause(d1, d2 types.Disjunction, lit types.Literal, atomCount uint) BaseClause {
+func ResolveBaseClause(d1, d2 types.Disjunction, lit types.Literal, atomCount uint) types.Clause {
 	var d types.Disjunction
 
 	for _, l := range d1 {

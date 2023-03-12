@@ -14,15 +14,28 @@ type BaseCDCLSolver struct {
 	AtomCount     uint
 	DecisionCount uint
 	F             types.Formula
+	Construct     func(types.Disjunction, bool) types.Clause
 }
 
-func InitializeBaseSolver(satfile types.SATFile) (solver BaseCDCLSolver, err error) {
+func InitializeBaseSolver(satfile types.SATFile, experimental bool) (solver BaseCDCLSolver, err error) {
 	var clauses []types.Clause
-	for _, d := range satfile.Clauses {
-		clauses = append(clauses, ConstructBaseClause(d, false))
+
+	if experimental {
+		solver.Construct = ConstructMapClause
+	} else {
+		solver.Construct = ConstructBaseClause
 	}
 
-	solver.F = BaseFormula{Clauses: clauses}
+	for _, d := range satfile.Clauses {
+		clauses = append(clauses, solver.Construct(d, false))
+
+	}
+
+	if experimental {
+		solver.F = ConstructHeap(clauses)
+	} else {
+		solver.F = BaseFormula{Clauses: clauses}
+	}
 
 	solver.DecisionCount = 0
 	solver.AtomCount = satfile.AtomCount
@@ -116,7 +129,9 @@ func (solver *BaseCDCLSolver) ResolveConflict(clause types.Clause) (err error) {
 
 	logger.Info(fmt.Sprintf("Conflict Detected %v", clause.Original()))
 
-	var resolved types.Clause = ConstructBaseClause(clause.Original(), false)
+	// var resolved types.Clause = ConstructBaseClause(clause.Original(), false)
+	var resolved types.Clause = ConstructMapClause(clause.Original(), false)
+
 	if resolved, err = solver.AnalyseConflict(resolved); err != nil {
 		return err
 	}

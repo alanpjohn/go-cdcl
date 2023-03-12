@@ -1,3 +1,4 @@
+// The io package handles the processing of DIMCAS format file
 package io
 
 import (
@@ -14,6 +15,7 @@ import (
 	types "github.com/alanpjohn/go-cdcl/pkg/types"
 )
 
+// Utility function to check if file exists
 func fileExists(filename string) (bool, error) {
 	if _, err := os.Stat(filename); err == nil {
 		return true, nil
@@ -24,6 +26,7 @@ func fileExists(filename string) (bool, error) {
 	}
 }
 
+// Extracts SATFile from the input buffer
 func Process(f *os.File) (sat types.SATFile, err error) {
 
 	fileScanner := bufio.NewScanner(f)
@@ -86,6 +89,7 @@ func Process(f *os.File) (sat types.SATFile, err error) {
 	return sat, err
 }
 
+// Open filename provided by user to process file contents into a SATFile
 func ReadFile(filename string) (out types.SATFile, err error) {
 	if filename == "" {
 		return types.SATFile{}, handler.Throw("Please input a file", nil)

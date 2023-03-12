@@ -1,11 +1,11 @@
-// The main file to run for execution
+// package main contains the main execution function that starts the CLI
 package main
 
 import (
 	"fmt"
 	"os"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v2" // CLI framework for a better user experience
 
 	handler "github.com/alanpjohn/go-cdcl/pkg/error"
 	reader "github.com/alanpjohn/go-cdcl/pkg/io"
@@ -14,13 +14,22 @@ import (
 	types "github.com/alanpjohn/go-cdcl/pkg/types"
 )
 
+// version string for versioning program externally using compiler options
 var version string
 
+/*
+Checks if the input is coming from stdin pipe
+*/
 func isInputFromPipe() bool {
 	fileInfo, _ := os.Stdin.Stat()
 	return fileInfo.Mode()&os.ModeCharDevice == 0
 }
 
+/*
+Takes configurable parameters from the CLI and starts the solver
+
+Tha Main command
+*/
 func solve(cCtx *cli.Context) error {
 	logger.Verbosity = cCtx.Bool("verbose")
 
@@ -31,13 +40,14 @@ func solve(cCtx *cli.Context) error {
 	}
 
 	var (
-		sol      types.Solver
-		sat      types.SATFile
+		sol      types.Solver  // The Solver class with the methods implemented for CDCL
+		sat      types.SATFile // Contains all the information extracted as DIMCAS Format
 		err      error
-		solution types.Solution
+		solution types.Solution // SATISFIABLE or UNSATISFIABLE or UNKNOWN
 	)
 
 	if isInputFromPipe() {
+		// The input is coming for stdin, our Process function returns an instance of SATFile
 		logger.Info("Recieved Input for stdin pipe")
 		if sat, err = reader.Process(os.Stdin); err != nil {
 			return err
@@ -46,16 +56,19 @@ func solve(cCtx *cli.Context) error {
 
 	if filename != "" {
 		logger.Info("Input from flag")
+		// The input has to read from the file, our Readfile function reads the file
+		// and then calls Process (internally) to return an instance of SATFile
 		if sat, err = reader.ReadFile(filename); err != nil {
 			return err
 		}
 	}
 
+	// Initalize the Solver with the SATFile
 	if sol, err = solver.InitializeBaseSolver(sat, cCtx.Bool("experimental")); err != nil {
 		return err
 	}
 	logger.Info("Solver initialized")
-	solution, err = sol.Solve()
+	solution, err = sol.Solve() // Get Solution
 	fmt.Print(solution.String())
 	return err
 }

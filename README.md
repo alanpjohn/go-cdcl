@@ -21,7 +21,7 @@ chmod +x ./gocdcl
 ```
 3. Run `gocdcl -h` to open help menu
 ```bash
-$ gocdcl -h
+$ ./gocdcl -h
 NAME:
    gocdcl - Pass SAT file as stdin pipe or using the -f/--file flag to run SAT solver
 

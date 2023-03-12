@@ -1,3 +1,4 @@
+// Test package to unit test different components of the BaseSolver
 package solver_test
 
 import (
